@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/user_settings.dart';
+import '../../data/models/energy_level.dart';
 import '../../data/repositories/session_repository.dart';
 
 final settingsProvider = StateNotifierProvider<SettingsNotifier, UserSettings>((ref) {
@@ -13,6 +14,11 @@ class SettingsNotifier extends StateNotifier<UserSettings> {
   
   void setEnergy(EnergyLevel energy) {
     state = state.copyWith(energyLevel: energy);
+    _repository.saveSettings(state);
+  }
+  
+  void setGoal(FocusGoal goal) {
+    state = state.copyWith(defaultGoal: goal);
     _repository.saveSettings(state);
   }
   
