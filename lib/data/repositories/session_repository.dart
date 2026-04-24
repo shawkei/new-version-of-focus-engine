@@ -1,65 +1,47 @@
-import '../local/local_storage.dart';
 import '../models/session.dart';
 import '../models/user_settings.dart';
-import '../../core/constants.dart';
 
 class SessionRepository {
-  final LocalStorage _storage;
-
-  SessionRepository({LocalStorage? storage}) : _storage = storage ?? LocalStorage();
-
-  Future<List<Session>> getAllSessions() async {
-    return await _storage.getSessions();
-  }
-
+  List<Session> _sessions = [];
+  UserSettings _settings = const UserSettings();
+  
   Future<List<Session>> getRecentSessions() async {
-    final sessions = await getAllSessions();
-    sessions.sort((a, b) => b.endedAt.compareTo(a.endedAt));
-    return sessions.take(AppConstants.lookbackWindow).toList();
+    // Return last 5 sessions
+    return _sessions.reversed.take(5).toList();
   }
-
-  Future<List<Session>> getTodaySessions() async {
-    final sessions = await getAllSessions();
-    final now = DateTime.now();
-    return sessions.where((s) {
-      return s.endedAt.year == now.year &&
-          s.endedAt.month == now.month &&
-          s.endedAt.day == now.day;
-    }).toList();
+  
+  Future<UserSettings> getSettings() async {
+    return _settings;
   }
-
+  
+  Future<void> saveSettings(UserSettings settings) async {
+    _settings = settings;
+  }
+  
   Future<void> saveSession(Session session) async {
-    final sessions = await getAllSessions();
-    sessions.add(session);
-    await _storage.saveSessions(sessions);
+    _sessions.add(session);
   }
-
-  Future<void> updateSession(Session updated) async {
-    final sessions = await getAllSessions();
-    final index = sessions.indexWhere((s) => s.id == updated.id);
+  
+  Future<void> saveInterruptedSession(int duration) async {
+    // Handle interrupted session
+  }
+  
+  Future<void> rateSession(String sessionId, bool wasFocused) async {
+    final index = _sessions.indexWhere((s) => s.id == sessionId);
     if (index != -1) {
-      sessions[index] = updated;
-      await _storage.saveSessions(sessions);
+      _sessions[index] = Session(
+        id: _sessions[index].id,
+        startedAt: _sessions[index].startedAt,
+        endedAt: _sessions[index].endedAt,
+        durationMinutes: _sessions[index].durationMinutes,
+        goal: _sessions[index].goal,
+        wasFocused: wasFocused,
+        energyLevel: _sessions[index].energyLevel,
+      );
     }
   }
-
-  Future<void> saveInterruptedSession(int durationMinutes) async {
-    final session = Session(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      startedAt: DateTime.now().subtract(Duration(minutes: durationMinutes)),
-      endedAt: DateTime.now(),
-      durationMinutes: durationMinutes,
-      goal: FocusGoal.work,
-      wasFocused: false,
-    );
-    await saveSession(session);
-  }
-
-  Future<UserSettings> getSettings() async {
-    return await _storage.getSettings();
-  }
-
-  Future<void> saveSettings(UserSettings settings) async {
-    await _storage.saveSettings(settings);
-  }
 }
+
+final sessionRepositoryProvider = Provider<SessionRepository>((ref) {
+  return SessionRepository();
+});
