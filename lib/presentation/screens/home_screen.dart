@@ -9,7 +9,6 @@ import '../../data/models/session.dart';
 import '../../data/models/daily_stats.dart';
 import '../../domain/services/insights_service.dart';
 import '../providers/timer_provider.dart';
-import '../providers/session_provider.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/circular_timer.dart';
 import '../widgets/energy_selector.dart';
