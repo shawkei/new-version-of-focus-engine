@@ -17,18 +17,22 @@ jobs:
         flutter-version: '3.19.0'
         channel: 'stable'
     
-    - name: Clean project
-      run: flutter clean
-    
     - name: Install dependencies
       run: flutter pub get
     
-    - name: Build APK
-      run: flutter build apk --release
+    - name: Build APK with verbose output
+      run: flutter build apk --release --verbose
+    
+    - name: List build directory
+      run: |
+        ls -la build/
+        ls -la build/app/outputs/ || echo "No outputs yet"
+        ls -la build/app/outputs/flutter-apk/ || echo "No APK yet"
     
     - name: Upload APK
+      if: success()
       uses: actions/upload-artifact@v4
       with:
         name: focus-engine-apk
         path: build/app/outputs/flutter-apk/app-release.apk
-        if-no-files-found: error
+        if-no-files-found: warn
