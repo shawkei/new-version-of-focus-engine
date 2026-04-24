@@ -17,7 +17,7 @@ class SettingsNotifier extends StateNotifier<UserSettings> {
     _repository.saveSettings(state);
   }
   
-  void setGoal(FocusGoal goal) {
+  void setGoal(FocusGoalType goal) {
     state = state.copyWith(defaultGoal: goal);
     _repository.saveSettings(state);
   }
