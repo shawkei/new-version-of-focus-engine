@@ -1,11 +1,11 @@
-import 'session_repository.dart' show sessionRepositoryProvider;
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/session.dart';
 import '../../data/repositories/session_repository.dart';
 import '../../domain/services/adaptive_timer_service.dart';
-import 'session_provider.dart';
+import '../../data/repositories/session_repository.dart';
 import 'settings_provider.dart';
 
 @immutable
