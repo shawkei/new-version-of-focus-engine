@@ -6,16 +6,21 @@ class CircularTimer extends StatelessWidget {
   final int duration;
   final double progress;
   final bool isRunning;
-  final String timeText;
-
+  
   const CircularTimer({
     super.key,
     required this.duration,
     required this.progress,
     required this.isRunning,
-    required this.timeText,
   });
-
+  
+  String get _timeText {
+    final remaining = (duration * 60 * (1 - progress)).round();
+    final mins = remaining ~/ 60;
+    final secs = remaining % 60;
+    return '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+  }
+  
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -47,9 +52,8 @@ class CircularTimer extends StatelessWidget {
                 duration: const Duration(milliseconds: 200),
                 style: Theme.of(context).textTheme.displayLarge!.copyWith(
                   color: isRunning ? AppTheme.primary : AppTheme.textPrimary,
-                  fontSize: 64,
                 ),
-                child: Text(timeText),
+                child: Text(_timeText),
               ),
               if (!isRunning)
                 Text(
@@ -68,24 +72,24 @@ class _TimerRingPainter extends CustomPainter {
   final double progress;
   final Color color;
   final double strokeWidth;
-
+  
   _TimerRingPainter({
     required this.progress,
     required this.color,
     required this.strokeWidth,
   });
-
+  
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
-
+    
     final paint = Paint()
       ..color = color
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
-
+    
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       -math.pi / 2,
@@ -94,7 +98,7 @@ class _TimerRingPainter extends CustomPainter {
       paint,
     );
   }
-
+  
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
