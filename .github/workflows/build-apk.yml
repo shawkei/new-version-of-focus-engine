@@ -17,22 +17,31 @@ jobs:
         flutter-version: '3.19.0'
         channel: 'stable'
     
-    - name: Install dependencies
-      run: flutter pub get
-    
-    - name: Build APK with verbose output
-      run: flutter build apk --release --verbose
-    
-    - name: List build directory
+    - name: Create fresh Flutter project
       run: |
-        ls -la build/
-        ls -la build/app/outputs/ || echo "No outputs yet"
-        ls -la build/app/outputs/flutter-apk/ || echo "No APK yet"
-    
+        cd /home/runner/work
+        flutter create --org com.shawkei --project-name focus_engine_build focus_engine_new
+        cd focus_engine_new
+        rm -rf lib
+        
+    - name: Copy source code
+      run: |
+        cp -r ${{ github.workspace }}/lib /home/runner/work/focus_engine_new/
+        cp ${{ github.workspace }}/pubspec.yaml /home/runner/work/focus_engine_new/
+        
+    - name: Fix pubspec if needed
+      run: |
+        cd /home/runner/work/focus_engine_new
+        flutter pub get
+        
+    - name: Build APK
+      run: |
+        cd /home/runner/work/focus_engine_new
+        flutter build apk --release
+        
     - name: Upload APK
-      if: success()
       uses: actions/upload-artifact@v4
       with:
         name: focus-engine-apk
-        path: build/app/outputs/flutter-apk/app-release.apk
-        if-no-files-found: warn
+        path: /home/runner/work/focus_engine_new/build/app/outputs/flutter-apk/app-release.apk
+        if-no-files-found: error
