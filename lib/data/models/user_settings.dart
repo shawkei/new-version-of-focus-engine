@@ -1,55 +1,31 @@
-import 'package:flutter/foundation.dart';
-import 'session.dart';
+import 'package:flutter/material.dart';
 
-@immutable
+enum EnergyLevel { low, normal, high }
+
 class UserSettings {
+  final int weeklyStreak;
   final EnergyLevel energyLevel;
-  final FocusGoal defaultGoal;
-  final int dailyGoal;
-  final bool darkMode;
   final String? lastInsight;
-
+  final int dailyGoal;
+  
   const UserSettings({
+    this.weeklyStreak = 0,
     this.energyLevel = EnergyLevel.normal,
-    this.defaultGoal = FocusGoal.work,
-    this.dailyGoal = 4,
-    this.darkMode = false,
     this.lastInsight,
+    this.dailyGoal = 4, // 4 sessions per day default
   });
-
+  
   UserSettings copyWith({
+    int? weeklyStreak,
     EnergyLevel? energyLevel,
-    FocusGoal? defaultGoal,
-    int? dailyGoal,
-    bool? darkMode,
     String? lastInsight,
+    int? dailyGoal,
   }) {
     return UserSettings(
+      weeklyStreak: weeklyStreak ?? this.weeklyStreak,
       energyLevel: energyLevel ?? this.energyLevel,
-      defaultGoal: defaultGoal ?? this.defaultGoal,
-      dailyGoal: dailyGoal ?? this.dailyGoal,
-      darkMode: darkMode ?? this.darkMode,
       lastInsight: lastInsight ?? this.lastInsight,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'energyLevel': energyLevel.name,
-      'defaultGoal': defaultGoal.name,
-      'dailyGoal': dailyGoal,
-      'darkMode': darkMode,
-      'lastInsight': lastInsight,
-    };
-  }
-
-  factory UserSettings.fromJson(Map<String, dynamic> json) {
-    return UserSettings(
-      energyLevel: EnergyLevel.values.byName(json['energyLevel'] as String),
-      defaultGoal: FocusGoal.values.byName(json['defaultGoal'] as String),
-      dailyGoal: json['dailyGoal'] as int? ?? 4,
-      darkMode: json['darkMode'] as bool? ?? false,
-      lastInsight: json['lastInsight'] as String?,
+      dailyGoal: dailyGoal ?? this.dailyGoal,
     );
   }
 }
