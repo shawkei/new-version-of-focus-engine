@@ -1,6 +1,6 @@
 import 'energy_level.dart';
 
-enum FocusGoal { study, work, skill, custom }
+enum FocusGoal { study, work, skill, custom, focus }
 
 class Session {
   final String id;
@@ -20,4 +20,24 @@ class Session {
     this.wasFocused,
     this.energyLevel,
   });
+  
+  Session copyWith({
+    String? id,
+    DateTime? startedAt,
+    DateTime? endedAt,
+    int? durationMinutes,
+    FocusGoal? goal,
+    bool? wasFocused,
+    EnergyLevel? energyLevel,
+  }) {
+    return Session(
+      id: id ?? this.id,
+      startedAt: startedAt ?? this.startedAt,
+      endedAt: endedAt ?? this.endedAt,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
+      goal: goal ?? this.goal,
+      wasFocused: wasFocused ?? this.wasFocused,
+      energyLevel: energyLevel ?? this.energyLevel,
+    );
+  }
 }
