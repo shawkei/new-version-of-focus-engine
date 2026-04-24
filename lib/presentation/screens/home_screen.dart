@@ -1,188 +1,95 @@
-import '../../data/models/user_settings.dart';
-import '../../data/models/energy_level.dart';
-// تأكد من وجود جميع الـ imports الصحيحة
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme.dart';
-import '../../data/models/session.dart';
-import '../../data/models/daily_stats.dart';
-import '../../domain/services/insights_service.dart';
+import '../../data/models/user_settings.dart';
+import '../../data/models/energy_level.dart';
+import '../../data/models/focus_goal.dart';
 import '../providers/timer_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/session_provider.dart';
 import '../widgets/circular_timer.dart';
 import '../widgets/energy_selector.dart';
 import '../widgets/goal_selector.dart';
 import '../widgets/insight_card.dart';
-import '../widgets/breathing_background.dart';
-import 'feedback_screen.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends ConsumerState<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(timerProvider.notifier).addListener((state) {
-        if (!state.isRunning && state.progress >= 1.0 && mounted) {
-          _onTimerComplete();
-        }
-      });
-    });
-  }
-
-  void _onTimerComplete() async {
-    final notifier = ref.read(timerProvider.notifier);
-    final session = await notifier.completeSession();
-
-    if (mounted) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => FeedbackScreen(session: session),
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final timerState = ref.watch(timerProvider);
     final settings = ref.watch(settingsProvider);
     final sessionState = ref.watch(sessionProvider);
-
+    
     return Scaffold(
-      body: timerState.isRunning
-          ? _ActiveTimerView(timerState: timerState)
-          : _HomeView(
-              timerState: timerState,
-              settings: settings,
-              stats: sessionState.stats,
-            ),
-    );
-  }
-}
-
-class _HomeView extends ConsumerWidget {
-  final TimerState timerState;
-  final UserSettings settings;
-  final DailyStats stats;
-
-  const _HomeView({
-    required this.timerState,
-    required this.settings,
-    required this.stats,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                _StreakIndicator(streak: stats.weeklyStreak),
-              ],
-            ),
-            const Spacer(),
-            Hero(
-              tag: 'timer',
-              child: CircularTimer(
-                duration: timerState.durationMinutes,
-                progress: timerState.progress,
-                isRunning: timerState.isRunning,
-                timeText: timerState.formattedTime,
-              ),
-            ),
-            const SizedBox(height: 48),
-            EnergySelector(
-              selected: settings.energyLevel,
-              onChanged: (e) => ref.read(settingsProvider.notifier).setEnergy(e),
-            ),
-            const SizedBox(height: 20),
-            GoalSelector(
-              selected: settings.defaultGoal,
-              onChanged: (g) => ref.read(settingsProvider.notifier).setGoal(g),
-            ),
-            const SizedBox(height: 40),
-            _PrimaryButton(
-              isRunning: timerState.isRunning,
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                ref.read(timerProvider.notifier).start();
-              },
-            ),
-            const Spacer(),
-            if (settings.lastInsight != null)
-              InsightCard(
-                insight: Insight(text: settings.lastInsight!, type: 'general'),
-              ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ActiveTimerView extends ConsumerWidget {
-  final TimerState timerState;
-
-  const _ActiveTimerView({required this.timerState});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return BreathingBackground(
-      child: SafeArea(
+      body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             children: [
               const SizedBox(height: 20),
+              
+              // Subtle streak indicator
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  IconButton(
-                    onPressed: () => _showCancelDialog(context, ref),
-                    icon: const Icon(Icons.close, color: AppTheme.textSecondary),
-                  ),
+                  _StreakIndicator(streak: settings.weeklyStreak),
                 ],
               ),
+              
               const Spacer(),
-              Text(
-                timerState.currentGoal.name.toUpperCase(),
-                style: const TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 2,
+              
+              // Main timer
+              Hero(
+                tag: 'timer',
+                child: CircularTimer(
+                  duration: timerState.durationMinutes,
+                  progress: timerState.progress,
+                  isRunning: timerState.isRunning,
                 ),
               ),
-              const SizedBox(height: 40),
-              CircularTimer(
-                duration: timerState.durationMinutes,
-                progress: timerState.progress,
-                isRunning: timerState.isRunning,
-                timeText: timerState.formattedTime,
-              ),
+              
               const SizedBox(height: 48),
-              const Text(
-                'Stay focused',
-                style: TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 18,
+              
+              // Energy selector (collapsible, subtle)
+              if (!timerState.isRunning) ...[
+                EnergySelector(
+                  selected: settings.energyLevel,
+                  onChanged: (e) => ref.read(settingsProvider.notifier).setEnergy(e),
                 ),
+                const SizedBox(height: 24),
+                
+                // Goal selector
+                GoalSelector(
+                  selected: _convertToFocusGoal(settings.defaultGoal),
+                  onChanged: (goal) {
+                    final newGoal = _convertToFocusGoalType(goal);
+                    ref.read(settingsProvider.notifier).setGoal(newGoal);
+                  },
+                ),
+                const SizedBox(height: 24),
+              ],
+              
+              // Primary action
+              _PrimaryButton(
+                isRunning: timerState.isRunning,
+                onPressed: () {
+                  if (timerState.isRunning) {
+                    _showCancelDialog(context, ref);
+                  } else {
+                    ref.read(timerProvider.notifier).start(
+                      goal: _convertToFocusGoal(settings.defaultGoal),
+                    );
+                  }
+                },
               ),
+              
               const Spacer(),
+              
+              // Weekly insight (one line, subtle)
+              if (settings.lastInsight != null)
+                InsightCard(insight: settings.lastInsight!),
+                
               const SizedBox(height: 20),
             ],
           ),
@@ -190,7 +97,35 @@ class _ActiveTimerView extends ConsumerWidget {
       ),
     );
   }
-
+  
+  // تحويل من FocusGoalType (من user_settings) إلى FocusGoal (من focus_goal)
+  FocusGoal _convertToFocusGoal(FocusGoalType type) {
+    switch (type) {
+      case FocusGoalType.focus:
+        return FocusGoal.focus;
+      case FocusGoalType.study:
+        return FocusGoal.study;
+      case FocusGoalType.work:
+        return FocusGoal.work;
+      case FocusGoalType.skill:
+        return FocusGoal.skill;
+    }
+  }
+  
+  // تحويل من FocusGoal (من focus_goal) إلى FocusGoalType (من user_settings)
+  FocusGoalType _convertToFocusGoalType(FocusGoal goal) {
+    switch (goal) {
+      case FocusGoal.focus:
+        return FocusGoalType.focus;
+      case FocusGoal.study:
+        return FocusGoalType.study;
+      case FocusGoal.work:
+        return FocusGoalType.work;
+      case FocusGoal.skill:
+        return FocusGoalType.skill;
+    }
+  }
+  
   void _showCancelDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
@@ -219,9 +154,9 @@ class _ActiveTimerView extends ConsumerWidget {
 class _PrimaryButton extends StatelessWidget {
   final bool isRunning;
   final VoidCallback onPressed;
-
+  
   const _PrimaryButton({required this.isRunning, required this.onPressed});
-
+  
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
@@ -242,9 +177,9 @@ class _PrimaryButton extends StatelessWidget {
 
 class _StreakIndicator extends StatelessWidget {
   final int streak;
-
+  
   const _StreakIndicator({required this.streak});
-
+  
   @override
   Widget build(BuildContext context) {
     return Container(
