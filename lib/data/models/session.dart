@@ -1,6 +1,5 @@
 import 'energy_level.dart';
-
-enum FocusGoal { study, work, skill, custom, focus }
+import 'focus_goal.dart';
 
 class Session {
   final String id;
