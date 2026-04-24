@@ -83,7 +83,10 @@ class TimerNotifier extends StateNotifier<TimerState> {
       durationMinutes: finalDuration,
       progress: 0.0,
       startTime: DateTime.now(),
-      currentGoal: goal ?? settings.defaultGoal,
+      currentGoal: goal ?? (settings.defaultGoal == FocusGoalType.focus ? FocusGoal.focus :
+                       settings.defaultGoal == FocusGoalType.study ? FocusGoal.study :
+                       settings.defaultGoal == FocusGoalType.work ? FocusGoal.work : 
+                       FocusGoal.skill),
       isBreak: false,
     );
 
