@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-
-enum EnergyLevel { low, normal, high }
+import 'energy_level.dart';
 
 class UserSettings {
   final int weeklyStreak;
@@ -12,7 +10,7 @@ class UserSettings {
     this.weeklyStreak = 0,
     this.energyLevel = EnergyLevel.normal,
     this.lastInsight,
-    this.dailyGoal = 4, // 4 sessions per day default
+    this.dailyGoal = 4,
   });
   
   UserSettings copyWith({
