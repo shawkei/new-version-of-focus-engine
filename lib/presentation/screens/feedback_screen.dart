@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme.dart';
 import '../../data/models/session.dart';
-import '../providers/session_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/timer_provider.dart';
 import 'progress_screen.dart';
