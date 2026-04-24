@@ -1,3 +1,6 @@
+import '../../data/models/user_settings.dart';
+import '../../data/models/energy_level.dart';
+// تأكد من وجود جميع الـ imports الصحيحة
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
