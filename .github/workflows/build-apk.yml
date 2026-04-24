@@ -14,32 +14,18 @@ jobs:
     
     - uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.19.0'  # تم التحديث لأحدث إصدار مستقر
+        flutter-version: '3.19.0'
         channel: 'stable'
     
-    - name: Create new Flutter project
-      run: |
-        cd ..
-        flutter create -t app focus_engine_new
-        cp -r ${{ github.workspace }}/lib focus_engine_new/
-        cp -r ${{ github.workspace }}/assets focus_engine_new/ 2>/dev/null || true
-        cp ${{ github.workspace }}/pubspec.yaml focus_engine_new/
-        cd focus_engine_new
-    
-    - name: Clean and get dependencies
-      run: |
-        cd ../focus_engine_new
-        flutter clean
-        flutter pub get
+    - name: Install dependencies
+      run: flutter pub get
     
     - name: Build APK
-      run: |
-        cd ../focus_engine_new
-        flutter build apk --release
+      run: flutter build apk --release
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: focus-engine-apk
-        path: ../focus_engine_new/build/app/outputs/flutter-apk/app-release.apk
+        path: build/app/outputs/flutter-apk/app-release.apk
         if-no-files-found: error
